@@ -32,7 +32,7 @@ jobs:
         if: steps.cache-opencv-sdk.outputs.cache-hit != 'true'
         run: |
           python3 ./opencv-src/platforms/android/build_sdk.py \
-            ./opencv-src ./ \
+            ./opencv-sdk ./opencv-src \
             --sdk_path $ANDROID_SDK_ROOT \
             --ndk_path $ANDROID_NDK_ROOT \
             --config ./opencv-build-config.py \
