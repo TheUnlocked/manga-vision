@@ -1,0 +1,50 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Cache OpenCV SDK
+        id: cache-opencv-sdk
+        uses: actions/cache@v4
+        with:
+          path: opencv-sdk
+          key: ${{ runner.os }}-opencv-${{ hashFiles('/opencv-build-config.py', '/.gitmodules') }}
+
+      - name: Compile OpenCV SDK
+        if: steps.cache-opencv-sdk.outputs.cache-hit != 'true'
+        run: |
+          python3 ./opencv-src/platforms/android/build_sdk.py \
+            ./opencv-src ./ \
+            --sdk_path $ANDROID_SDK_ROOT \
+            --ndk_path $ANDROID_NDK_ROOT \
+            --config ./opencv-build-config.py \
+            --modules_list 'core,imgproc' \
+            --no_samples_build --use_android_buildtools \
+            --no_media_ndk --no-strict-dependencies
+
+      - name: Build app
+        run: ./gradlew assembleRelease
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: manga-vision AAR
+          path: mangavision/build/outputs/aar/mangavision-release.aar

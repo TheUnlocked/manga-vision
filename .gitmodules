@@ -1,0 +1,4 @@
+[submodule "opencv-src"]
+	path = opencv-src
+	url = https://github.com/opencv/opencv.git
+	branch = tags/4.12.0
