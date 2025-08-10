@@ -40,6 +40,9 @@ jobs:
             --no_samples_build --use_android_buildtools \
             --no_media_ndk --no-strict-dependencies
 
+      - name: Cache .gradle
+        uses: burrunan/gradle-cache-action@v3
+
       - name: Build app
         run: ./gradlew assembleRelease
 
