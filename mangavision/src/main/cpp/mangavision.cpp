@@ -97,10 +97,12 @@ double getSeamDiscontinuity(const cv::Mat& mat1, const cv::Mat& mat2) {
             mat2.colRange(0, halfBandSize),
             fused);
 
-    cv::Mat edges(fused.size(), fused.type());
+    cv::Mat edges(fused.size(), CV_8UC1);
     cv::Canny(fused, edges, CANNY_THRESHOLD_MIN, CANNY_THRESHOLD_MAX);
 
-    cv::Mat centerEdges = edges.colRange(halfBandSize - 1, halfBandSize + 1);
+    // Keeping this as a "matrix header" makes filter2D work incorrectly, so we need to clone it.
+    cv::Mat centerEdges = edges.colRange(halfBandSize - 1, halfBandSize + 1).clone();
+
     double edgesMean = cv::mean(centerEdges).val[0];
 
     // Shouldn't happen in practice, but there is a hypothetical divide-by-zero if this case is unchecked
@@ -108,11 +110,11 @@ double getSeamDiscontinuity(const cv::Mat& mat1, const cv::Mat& mat2) {
         return 0;
     }
 
-    cv::Mat kernel(3, 3, CV_64FC1, (double[]) {
+    cv::Mat kernel = (cv::Mat_<double>(3, 3, CV_64FC1) <<
         0, 0.5, 0,
         -1, 1, -1,
         0, 0.5, 0
-    });
+    );
 
     cv::Mat convolved(centerEdges.size(), centerEdges.type());
     cv::filter2D(centerEdges, convolved, -1, kernel);
