@@ -1,10 +1,14 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.maven.publish)
+    alias(libs.plugins.jreleaser)
 }
 
 android {
-    namespace = "com.github.theunlocked.mangavision"
+    namespace = "io.github.theunlocked.mangavision"
     compileSdk = 36
 
     defaultConfig {
@@ -31,20 +35,94 @@ android {
             )
         }
     }
+
     externalNativeBuild {
         cmake {
             path("src/main/cpp/CMakeLists.txt")
             version = "3.22.1"
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
+
+    publishing {
+        singleVariant("release") {
+            withJavadocJar()
+            withSourcesJar()
+        }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget("17")
     }
 }
 
 dependencies {
+}
+
+publishing {
+    publications {
+        val mavenPublishVersion = System.getenv("MAVEN_PUBLISH_VERSION")
+        if (mavenPublishVersion != null) {
+            register<MavenPublication>("release") {
+                groupId = "io.github.theunlocked"
+                artifactId = "manga-vision"
+                version = mavenPublishVersion
+
+                pom {
+                    name = "manga-vision"
+                    description = "An android library that uses OpenCV to process manga images"
+                    licenses {
+                        license {
+                            name = "MIT License"
+                            url = "https://opensource.org/license/MIT"
+                            distribution = "repo"
+                        }
+                    }
+                    scm {
+                        url = "https://github.com/TheUnlocked/manga-vision"
+                    }
+                }
+
+                afterEvaluate {
+                    from(components["release"])
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = uri(layout.buildDirectory.dir("staging-deploy").get())
+        }
+    }
+}
+
+jreleaser {
+    version = "1.0"
+    gitRootSearch = true
+    signing {
+        setActive("ALWAYS")
+        armored = true
+    }
+    release {
+        github {
+            skipRelease = true
+        }
+    }
+    deploy {
+        maven {
+            mavenCentral {
+                create("sonatype") {
+                    setActive("ALWAYS")
+                    url = "https://central.sonatype.com/api/v1/publisher"
+                    stagingRepository("build/staging-deploy")
+                }
+            }
+        }
+    }
 }

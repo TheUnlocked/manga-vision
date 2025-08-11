@@ -1,4 +1,4 @@
-package com.github.theunlocked.mangavision
+package io.github.theunlocked.mangavision
 
 import android.graphics.Bitmap
 
