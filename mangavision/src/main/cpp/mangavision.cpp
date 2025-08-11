@@ -8,7 +8,7 @@
 #include "mangavision.h"
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_github_theunlocked_mangavision_SpreadDetector_nIsSpread(
+Java_io_github_theunlocked_mangavision_SpreadDetector_nIsSpread(
         JNIEnv* env,
         jclass,
         jobject left,
