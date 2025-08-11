@@ -65,33 +65,32 @@ kotlin {
 dependencies {
 }
 
+val mavenPublishVersion = System.getenv("MAVEN_PUBLISH_VERSION") ?: "0-SNAPSHOT"
+
 publishing {
     publications {
-        val mavenPublishVersion = System.getenv("MAVEN_PUBLISH_VERSION")
-        if (mavenPublishVersion != null) {
-            register<MavenPublication>("release") {
-                groupId = "io.github.theunlocked"
-                artifactId = "manga-vision"
-                version = mavenPublishVersion
+        register<MavenPublication>("release") {
+            groupId = "io.github.theunlocked"
+            artifactId = "manga-vision"
+            version = mavenPublishVersion
 
-                pom {
-                    name = "manga-vision"
-                    description = "An android library that uses OpenCV to process manga images"
-                    licenses {
-                        license {
-                            name = "MIT License"
-                            url = "https://opensource.org/license/MIT"
-                            distribution = "repo"
-                        }
-                    }
-                    scm {
-                        url = "https://github.com/TheUnlocked/manga-vision"
+            pom {
+                name = "manga-vision"
+                description = "An android library that uses OpenCV to process manga images"
+                licenses {
+                    license {
+                        name = "MIT License"
+                        url = "https://opensource.org/license/MIT"
+                        distribution = "repo"
                     }
                 }
-
-                afterEvaluate {
-                    from(components["release"])
+                scm {
+                    url = "https://github.com/TheUnlocked/manga-vision"
                 }
+            }
+
+            afterEvaluate {
+                from(components["release"])
             }
         }
     }
@@ -103,7 +102,7 @@ publishing {
 }
 
 jreleaser {
-    version = "1.0"
+    version = mavenPublishVersion
     gitRootSearch = true
     signing {
         setActive("ALWAYS")
