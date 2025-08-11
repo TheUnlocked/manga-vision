@@ -1,4 +1,4 @@
-name: Build
+name: Build and Deploy
 
 on:
   push:
@@ -10,16 +10,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: The release version
+        description: The release version. If omitted, the commit SHA will be used.
         type: string
-        required: true
+        required: false
       deploy_maven_central:
-        description: Whether to deploy to Maven Central
-        type: boolean
-        required: true
-        default: true
-      deploy_dry_run:
-        description: Whether this is a dry run (if true, the package will not actually be deployed)
+        description: Whether to upload to Maven Central (publishing is still manual)
         type: boolean
         required: true
         default: false
@@ -68,10 +63,15 @@ jobs:
           name: manga-vision
           path: mangavision/build/outputs/aar/mangavision-release.aar
 
-      - name: Prepare deployment
-        if: ${{ inputs.deploy_maven_central }}
+      - name: Get Git SHA
+        id: get-commit-info
+        if: ${{ !inputs.version }}
+        run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Deploy
+        if: ${{ inputs.deploy_maven_central || (github.event_name == 'push' && github.ref_name == 'main') }}
         env:
-          MAVEN_PUBLISH_VERSION: ${{ inputs.version }}
+          MAVEN_PUBLISH_VERSION: ${{ inputs.version || steps.get-commit-info.short_sha }}
           JRELEASER_GITHUB_TOKEN: ${{ github.token }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY }}
           JRELEASER_GPG_SECRET_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_SECRET_KEY }}

@@ -143,6 +143,7 @@ jreleaser {
                     setActive("ALWAYS")
                     url = "https://central.sonatype.com/api/v1/publisher"
                     stagingRepository("build/staging-deploy")
+                    setStage("UPLOAD")
                 }
             }
         }
