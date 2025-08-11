@@ -77,15 +77,35 @@ publishing {
             pom {
                 name = "manga-vision"
                 description = "An android library that uses OpenCV to process manga images"
+                url = "https://github.com/TheUnlocked/manga-vision"
                 licenses {
                     license {
                         name = "MIT License"
                         url = "https://opensource.org/license/MIT"
-                        distribution = "repo"
+                    }
+                }
+                developers {
+                    developer {
+                        name = "Unlocked"
+                        organizationUrl = "https://github.com/TheUnlocked"
                     }
                 }
                 scm {
                     url = "https://github.com/TheUnlocked/manga-vision"
+                    connection = "scm:git:https://github.com/TheUnlocked/manga-vision.git"
+                    developerConnection = "scm:git:ssh://github.com/TheUnlocked/manga-vision.git"
+                }
+                pom.withXml {
+                    asNode().appendNode("build").apply {
+                        appendNode("plugins").apply {
+                            appendNode("plugin").apply {
+                                appendNode("groupId", "com.simpligility.maven.plugins")
+                                appendNode("artifactId", "android-maven-plugin")
+                                appendNode("version", "4.6.0")
+                                appendNode("extensions", "true")
+                            }
+                        }
+                    }
                 }
             }
 
@@ -102,6 +122,9 @@ publishing {
 }
 
 jreleaser {
+    project {
+        versionPattern = "CUSTOM"
+    }
     version = mavenPublishVersion
     gitRootSearch = true
     signing {
