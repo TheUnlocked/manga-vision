@@ -63,15 +63,15 @@ jobs:
           name: manga-vision
           path: mangavision/build/outputs/aar/mangavision-release.aar
 
-      - name: Get Git SHA
+      - name: Get Commit Info
         id: get-commit-info
         if: ${{ !inputs.version }}
-        run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: echo "short-sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Deploy
         if: ${{ inputs.deploy_maven_central || (github.event_name == 'push' && github.ref_name == 'main') }}
         env:
-          MAVEN_PUBLISH_VERSION: ${{ inputs.version || steps.get-commit-info.short_sha }}
+          MAVEN_PUBLISH_VERSION: ${{ inputs.version || steps.get-commit-info.outputs.short-sha }}
           JRELEASER_GITHUB_TOKEN: ${{ github.token }}
           JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_PUBLIC_KEY }}
           JRELEASER_GPG_SECRET_KEY: ${{ secrets.MAVEN_CENTRAL_GPG_SECRET_KEY }}
