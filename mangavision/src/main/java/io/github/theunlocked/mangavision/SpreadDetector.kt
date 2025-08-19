@@ -3,8 +3,7 @@ package io.github.theunlocked.mangavision
 import android.graphics.Bitmap
 
 object SpreadDetector {
-    @JvmStatic
-    fun init() {
+    init {
         System.loadLibrary("mangavision")
     }
 
